@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.movie.movieflow.media.MediaMapper">
+
+    <insert id="postMedia" useGeneratedKeys="true" keyProperty="imedia">
+        insert into t_media
+        set iuser = #{iuser},
+        genrepk = #{genrepk},
+        title = #{title},
+        date = #{date}
+        <if test="comment != null and comment != ''">
+            ,comment = #{comment}
+        </if>
+        <if test="star > 0 ">
+            ,star = #{star}
+        </if>
+        ,is_saw = #{isSaw}
+    </insert>
+
+    <insert id="postMediaPic">
+        insert into t_media_pics
+        (imedia, pic)
+        values (
+        <foreach collection="pics" item="pic" separator="),(">
+            #{imedia}, #{pic}
+        </foreach>
+        )
+    </insert>
+
+    <select id="allMedia">
+        SELECT DAY(a.date)AS day, b.pic, COUNT(DISTINCT a.imedia) AS count, a.imedia
+        FROM t_media a
+        JOIN t_media_pics b
+        ON a.imedia = b.imedia
+        WHERE a.iuser = #{iuser}
+        AND YEAR(a.date) = #{year}
+        AND MONTH(a.DATE) = #{month}
+        and del = 0
+        GROUP BY a.date
+    </select>
+
+    <select id="dayMedia">
+        select a.imedia, a.star, a.title, a.date, b.pic
+        from t_media a
+        join t_media_pics b
+        on a.imedia = b.imedia
+        where a.iuser = #{iuser}
+        and a.date = #{date}
+        and del = 0
+        group by a.imedia
+    </select>
+
+    <select id="myPageMedia">
+        SELECT a.title, a.date, a.star, a.imedia, b.pic
+        FROM t_media a
+        JOIN t_media_pics b
+        ON a.imedia = b.imedia
+        WHERE a.iuser = #{iuser}
+        AND is_saw = #{isSaw}
+        and del = 0
+    </select>
+
+    <select id="detailMedia">
+        select title, date, genrepk, star, comment, is_saw as isSaw
+        from t_media
+        where iuser = #{iuser}
+        and imedia = #{imedia}
+        and del = 0
+    </select>
+
+    <select id="detailMediaPic">
+        select pic
+        from t_media_pics
+        where imedia = #{imedia}
+    </select>
+
+    <update id="sawMedia">
+        update t_media
+        set is_saw = #{isSaw}
+        where iuser = #{iuser}
+        and imedia = #{imedia}
+    </update>
+
+    <delete id="delPicMedia">
+        delete from t_media_pics
+        where imedia = #{imedia}
+    </delete>
+
+    <insert id="insPicMedia">
+        insert into t_media_pics
+        (imedia, pic)
+        values (
+        <foreach collection="pics" item="pic" separator="),(">
+            #{imedia}, #{pic}
+        </foreach>
+        )
+    </insert>
+
+    <update id="UpdMedia">
+        update t_media
+        set title = #{title}
+        , date = #{date}
+        , genrepk = #{genrepk}
+        , is_saw = #{isSaw}
+        <if test="star != null and star != ''">
+        , star = #{star}
+        </if>
+        <if test="comment != null and comment != ''">
+        , comment = #{comment}
+        </if>
+        where iuser = #{iuser}
+        and imedia = #{imedia}
+        and del = 0
+    </update>
+
+    <update id="delMedia">
+        update t_media
+        set del = 1
+        where iuser = #{iuser}
+        and imedia = #{imedia}
+    </update>
+
+</mapper>
